@@ -53,9 +53,9 @@ impl Ball {
             sprite,
             vx: 0.0,
             vy: 0.0,
-            speed: 1.009,
+            speed: 0.90,
             theta: 3.6,
-            theta_speed: 0.06,
+            theta_speed: 0.45,
             power: 10.0,
             power_step: 1.0,
         }
@@ -118,8 +118,16 @@ impl Ball {
     }
 
     pub fn hit(&mut self) {
-        self.vx = self.power * self.speed * f64::sin(self.theta - PI / 2.0);
-        self.vy = self.power * self.speed * f64::cos(self.theta + PI / 2.0);
+        let power_scalers =  self.power * self.speed ;
+        self.vx = power_scalers * f64::sin(self.theta - PI / 2.0);
+        self.vy = power_scalers * f64::cos(self.theta + PI / 2.0);
+
+        // if self.vy < 1.00 {
+        //     self.vy = 2.0
+        // }
+        // if self.vx < 1.00 {
+        //     self.vx = 2.0
+        // }
     }
 
     pub fn roll(&mut self, playground: &GameMap) {
@@ -128,9 +136,9 @@ impl Ball {
         self.old_point.y = self.point.y;
         self.point.x = (self.point.x as f64 + (self.vx)) as usize;
         self.point.y = (self.point.y as f64 + (self.vy)) as usize;
-        self.vx = self.vx * 0.99110;
-        self.vy = self.vy * 0.99110;
-        if f64::abs(self.vx) + f64::abs(self.vy)< 0.90 {
+        self.vx = self.vx * 0.9990;
+        self.vy = self.vy * 0.9990;
+        if f64::abs(self.vx) < 1.0 || f64::abs(self.vy)< 1.0 {
             self.vx = 0.0;
             self.vy = 0.0;
         }
@@ -190,7 +198,7 @@ impl Ball {
         println!("Ball X Velocity: {} Ball Y Velocity: {}", self.vx,self.vy);
 
     }
-    pub fn is_within_x_bounds(&self, playground: &GameMap) -> bool {
+     fn is_within_x_bounds(&self, playground: &GameMap) -> bool {
         if self.point.x < playground.left() || self.point.x + self.sprite.width > playground.right()
         {
             return false;
@@ -198,7 +206,7 @@ impl Ball {
             return true;
         }
     }
-    pub fn is_within_y_bounds(&self, playground: &GameMap) -> bool {
+     fn is_within_y_bounds(&self, playground: &GameMap) -> bool {
         if self.point.y < playground.top()
             || self.point.y + self.sprite.height > playground.bottom()
         {

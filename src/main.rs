@@ -66,8 +66,8 @@ impl GameScreen {
         // Pump the gilrs event loop and find an active gamepad
         self.controls = {
             // Keyboard controls
-            let mut left = self.input.key_held(VirtualKeyCode::Left);
-            let mut right = self.input.key_held(VirtualKeyCode::Right);
+            let mut left = self.input.key_pressed(VirtualKeyCode::Left);
+            let mut right = self.input.key_pressed(VirtualKeyCode::Right);
             let mut up = self.input.key_held(VirtualKeyCode::Up);
             let mut down = self.input.key_held(VirtualKeyCode::Down);
             let mut hit = self.input.key_pressed(VirtualKeyCode::Space);

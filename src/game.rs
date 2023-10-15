@@ -107,13 +107,13 @@ impl GameState {
     fn update_power_level(&mut self, controls: &Controls) {
         match controls.power {
             PowerLevel::Up => {
-                if self.ball.power + self.ball.power_step < 20.0 {
+                if self.ball.power + self.ball.power_step < 5.0 {
                                         self.ball.power += self.ball.power_step;
                                         // println!("{}", self.ball.power);
                                     }
             }
             PowerLevel::Down => {
-                if self.ball.power - self.ball.power_step > 5.0 {
+                if self.ball.power - self.ball.power_step > 1.0 {
                     self.ball.power -= self.ball.power_step;
                     // println!("{}", app.ball.power);
                 }
