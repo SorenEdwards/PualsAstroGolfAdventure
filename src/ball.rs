@@ -4,6 +4,8 @@ use crate::geo::*;
 use crate::helpers::*;
 use crate::sprites::*;
 use crate::tiling::*;
+
+
 static PI: f64 = 3.14159265359;
 
 pub struct AimLine {
@@ -51,8 +53,8 @@ impl Ball {
             sprite,
             vx: 0.0,
             vy: 0.0,
-            speed: 0.9000000,
-            theta: 0.0,
+            speed: 1.009,
+            theta: 3.6,
             theta_speed: 0.06,
             power: 10.0,
             power_step: 1.0,
@@ -116,8 +118,8 @@ impl Ball {
     }
 
     pub fn hit(&mut self) {
-        self.vx = self.power * self.speed * f64::sin(self.theta - PI / 2.0);
-        self.vy = self.power * self.speed * f64::cos(self.theta + PI / 2.0);
+        self.vx = 2.0 * self.power * self.speed * f64::sin(self.theta - PI / 2.0);
+        self.vy = 2.0 * self.power * self.speed * f64::cos(self.theta + PI / 2.0);
     }
     pub fn roll(&mut self, playground: &GameMap) {
         self.handle_collision(playground);
@@ -139,18 +141,18 @@ impl Ball {
         let x_pos = (ball_center.x as i32) >> 4;
         let y_pos = (ball_center.y as i32) >> 4;
 
-        let x_upper = self.left() as f64 + 8.0;
-        let x_lower = self.right() as f64 - 8.0;
+        let x_upper = self.left() + 10;
+        let x_lower = self.right() - 10;
 
-        let y_upper = self.top() as f64 + 8.0;
-        let y_lower = self.bottom() as f64 - 8.0;
+        let y_upper = self.top() + 10;
+        let y_lower = self.bottom() - 10;
 
         let x_pos_upper = (x_upper as i32) >> 4;
         let x_pos_lower = (x_lower as i32) >> 4;
 
         let y_pos_upper = (y_upper as i32) >> 4;
         let y_pos_lower = (y_lower as i32) >> 4;
-
+        println!("X UP: {} X LOWER: {} Y UP: {} Y: LOWER{}",x_pos_upper,x_pos_lower,y_pos_upper,y_pos_lower);
         let x_upper_collides_wall = map
             .tile_grid
             .tile_at(x_pos_upper as usize, y_pos as usize)
@@ -185,10 +187,7 @@ impl Ball {
             self.point.y = self.old_point.y;
             self.vy = -self.vy;
         }
-        println!(
-            "X:{}, Y:{}, VX: {}, VY:{}",
-            self.point.x, self.point.y, self.vx, self.vy
-        );
+
     }
     pub fn is_within_x_bounds(&self, playground: &GameMap) -> bool {
         if self.point.x < playground.left() || self.point.x + self.sprite.width > playground.right()
@@ -256,29 +255,6 @@ impl Ball {
         self.point.y = destination.y;
     }
 
-    // pub fn move_ball(&mut self) {
-    //     let new_loc_x = self.point.x as f64 + (self.vx + 1.0);
-    //     let new_loc_y = self.point.y as f64 + (self.vy + 1.0);
-    //     self.point.x = new_loc_x as usize;
-    //     self.point.y = new_loc_y as usize;
-    // }
-    /// Update the `World` internal state; bounce the box around the screen.
-    // fn update(&mut self) {
-    //     if self.point.x <= 0 || self.point.x + BALL_WIDTH >= WIDTH {
-    //         self.velocity_x *= -1;
-    //     }
-    //     if self.point.y <= 0 || self.point.y + BALL_HEIGHT >= HEIGHT {
-    //         self.velocity_y *= -1;
-    //     }
-    //     let temp_x = self.point.x as i16 + self.velocity_x;
-    //     let temp_y = self.point.y as i16 + self.velocity_y;
-    //     self.point.x = temp_x as usize;
-    //     self.point.y = temp_y as usize;
-    // }
-
-    /// Draw the `World` state to the frame buffer.
-    ///
-    /// Assumes the default texture format: `wgpu::TextureFormat::Rgba8UnormSrgb`
     pub fn draw(&self, frame: &mut [u8]) {
         blit(frame, &self.point, &self.sprite);
     }

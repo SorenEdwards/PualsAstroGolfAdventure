@@ -1,6 +1,8 @@
 use crate::ball::*;
 use crate::geo::*;
 use crate::tiling::*;
+use crate::controls::*;
+
 pub struct GameMap {
     pub point: Point,
     pub width: usize,
@@ -81,7 +83,62 @@ impl GameState {
             map: GameMap::new(),
         }
     }
-    pub fn update(&mut self) {
+    fn update_aiming(&mut self, controls: &Controls) {
+        match controls.aiming {
+            Direction::Left => {
+                if self.ball.theta + self.ball.theta_speed == 3.60 {
+                    self.ball.theta = 0.0;
+                } else {
+                    self.ball.theta += self.ball.theta_speed;
+                }
+            }
+            Direction::Right => {
+                if self.ball.theta - self.ball.theta_speed == 0.0 {
+                    self.ball.theta = 3.6;
+                } else {
+                    self.ball.theta -= self.ball.theta_speed;
+                }
+            }
+            Direction::Still => {
+
+            }
+        }
+    }
+    fn update_power_level(&mut self, controls: &Controls) {
+        match controls.power {
+            PowerLevel::Up => {
+                if self.ball.power + self.ball.power_step < 20.0 {
+                                        self.ball.power += self.ball.power_step;
+                                        // println!("{}", self.ball.power);
+                                    }
+            }
+            PowerLevel::Down => {
+                if self.ball.power - self.ball.power_step > 5.0 {
+                    self.ball.power -= self.ball.power_step;
+                    // println!("{}", app.ball.power);
+                }
+            }
+            PowerLevel::Same => {
+
+            }
+        }
+    }
+    fn update_hitting(&mut self, controls: &Controls) {
+        if controls.hit == true && self.state == GolfState::Aiming {
+            self.state = GolfState::Hitting;
+        }
+    }
+    fn update_controls(&mut self, controls: &Controls) {
+        self.update_aiming(controls);
+        self.update_power_level(controls);
+        self.update_hitting(controls);
+    }
+    pub fn update(&mut self, controls: &Controls) {
+        self.update_state();
+        self.update_controls(controls);
+
+    }
+    pub fn update_state(&mut self) {
         match self.state {
             GolfState::Aiming => {}
             GolfState::Rolling => {
@@ -120,6 +177,8 @@ impl GameState {
                 self.state = GolfState::Aiming;
             }
         }
+
+
     }
     pub fn draw(&self, frame: &mut [u8]) {
         match self.state {
@@ -148,3 +207,17 @@ impl GameState {
         }
     }
 }
+
+pub struct InfoScreen {
+    loc: Point
+}
+
+impl InfoScreen {
+    pub fn new() -> Self{
+        Self {
+            loc: Point::new(0,0)
+        }
+    }
+}
+
+
