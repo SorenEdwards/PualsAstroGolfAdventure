@@ -118,9 +118,10 @@ impl Ball {
     }
 
     pub fn hit(&mut self) {
-        self.vx = 2.0 * self.power * self.speed * f64::sin(self.theta - PI / 2.0);
-        self.vy = 2.0 * self.power * self.speed * f64::cos(self.theta + PI / 2.0);
+        self.vx = self.power * self.speed * f64::sin(self.theta - PI / 2.0);
+        self.vy = self.power * self.speed * f64::cos(self.theta + PI / 2.0);
     }
+
     pub fn roll(&mut self, playground: &GameMap) {
         self.handle_collision(playground);
         self.old_point.x = self.point.x;
@@ -129,12 +130,11 @@ impl Ball {
         self.point.y = (self.point.y as f64 + (self.vy)) as usize;
         self.vx = self.vx * 0.99110;
         self.vy = self.vy * 0.99110;
-        if f64::abs(self.vx) < 1.00 {
+        if f64::abs(self.vx) + f64::abs(self.vy)< 0.90 {
             self.vx = 0.0;
-        }
-        if f64::abs(self.vy) < 1.00 {
             self.vy = 0.0;
         }
+
     }
     pub fn handle_collision(&mut self, map: &GameMap) {
         let ball_center = self.center();
@@ -187,6 +187,7 @@ impl Ball {
             self.point.y = self.old_point.y;
             self.vy = -self.vy;
         }
+        println!("Ball X Velocity: {} Ball Y Velocity: {}", self.vx,self.vy);
 
     }
     pub fn is_within_x_bounds(&self, playground: &GameMap) -> bool {
