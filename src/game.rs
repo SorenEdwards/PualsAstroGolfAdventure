@@ -86,18 +86,10 @@ impl GameState {
     fn update_aiming(&mut self, controls: &Controls) {
         match controls.aiming {
             Direction::Left => {
-                if self.ball.theta + self.ball.theta_speed == 3.60 {
-                    self.ball.theta = 0.0;
-                } else {
-                    self.ball.theta += self.ball.theta_speed;
-                }
+                self.ball.theta += self.ball.theta_speed;
             }
             Direction::Right => {
-                if self.ball.theta - self.ball.theta_speed == 0.0 {
-                    self.ball.theta = 3.6;
-                } else {
-                    self.ball.theta -= self.ball.theta_speed;
-                }
+                self.ball.theta -= self.ball.theta_speed;
             }
             Direction::Still => {
 
@@ -107,15 +99,13 @@ impl GameState {
     fn update_power_level(&mut self, controls: &Controls) {
         match controls.power {
             PowerLevel::Up => {
-                if self.ball.power + self.ball.power_step < 5.0 {
-                                        self.ball.power += self.ball.power_step;
-                                        // println!("{}", self.ball.power);
-                                    }
+                if self.ball.power + self.ball.power_step < 10.3 {
+                    self.ball.power += self.ball.power_step;
+                }
             }
             PowerLevel::Down => {
-                if self.ball.power - self.ball.power_step > 1.0 {
+                if self.ball.power - self.ball.power_step > 0.7 {
                     self.ball.power -= self.ball.power_step;
-                    // println!("{}", app.ball.power);
                 }
             }
             PowerLevel::Same => {
@@ -148,7 +138,7 @@ impl GameState {
                 let y_pos = (ball_center.y as i32) >> 4;
 
                 let is_ball_velocity_in_range =
-                    f64::abs(self.ball.vx) <= 10.0 && f64::abs(self.ball.vy) <= 10.0;
+                    f64::abs(self.ball.velocity.x()) <= 10.0 && f64::abs(self.ball.velocity.y()) <= 10.0;
                 let is_ball_in_hole = self
                     .map
                     .tile_grid
@@ -158,9 +148,13 @@ impl GameState {
                     && is_ball_velocity_in_range;
                 if is_ball_in_hole {
                     self.state = GolfState::InHole;
+                    let reset_point = Point::new(28,30);
+                    self.ball = Ball::new_at_loc(28, 30);
                 }
-
-                if self.ball.vx == 0.0 && self.ball.vy == 0.0 {
+                // if self.ball.power == 0.0 {
+                //     self.state = GolfState::Aiming;
+                // }
+                if self.ball.velocity.x() == 0.0 || self.ball.velocity.y() == 0.0 {
                     self.state = GolfState::Aiming;
                 }
             }
@@ -185,7 +179,7 @@ impl GameState {
             GolfState::Aiming => {
                 self.map.draw(frame);
                 self.ball.draw(frame);
-                let path = self.ball.calc_aim_path(&self.map);
+                let path = self.ball.aim_path(&self.map);
                 path.draw(frame);
             }
             GolfState::Hitting => {

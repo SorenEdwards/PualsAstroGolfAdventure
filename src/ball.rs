@@ -7,11 +7,60 @@ use crate::tiling::*;
 
 
 static PI: f64 = 3.14159265359;
+pub struct BallVelocity {
+    velocity:Vec2<f64>,
+    friction: f64
+}
+
+impl BallVelocity {
+    pub fn new(x: f64, y: f64) -> Self {
+        Self {
+            velocity: Vec2::new(x,y),
+            friction: 0.9980
+        }
+    }
+    pub fn x(&self) -> f64{
+        return self.velocity.x;
+    }
+    pub fn y(&self) -> f64{
+        return self.velocity.y;
+    }
+    pub fn update(&mut self, vel:Vec2<f64>) {
+        self.velocity = vel;
+    }
+    pub fn invert_x(&mut self) {
+        self.velocity.x = -self.velocity.x;
+    }
+    pub fn invert_y(&mut self) {
+        self.velocity.y = -self.velocity.y;
+    }
+    pub fn stop(&mut self) {
+        self.velocity.x = 0.0;
+        self.velocity.y = 0.0;
+    }
+    pub fn slow(&mut self) {
+        self.velocity.x = self.velocity.x * self.friction;
+        self.velocity.y = self.velocity.y * self.friction;
+        println!("SLOWWED Ball X Velocity: {} Ball Y Velocity: {}", self.velocity.x,self.velocity.y);
+    }
+    pub fn velocity_below(&self, threshold: f64) -> bool {
+        return f64::abs(self.velocity.x)  +  f64::abs(self.velocity.y) < threshold 
+    }
+    pub fn to_map_point(self) -> Point{
+        return Point::new(self.velocity.x as usize, self.velocity.y as usize);
+    }
+}
+
+pub enum BallState {
+    Rolling,
+    Stopped
+}
 
 pub struct AimLine {
     p1: Point,
     p2: Point,
 }
+
 impl AimLine {
     pub fn new(x1: usize, y1: usize, x2: usize, y2: usize) -> Self {
         let p1 = Point::new(x1, y1);
@@ -27,8 +76,8 @@ pub struct Ball {
     old_point: Point,
     point: Point,
     sprite: Sprite,
-    pub vx: f64,
-    pub vy: f64,
+    pub velocity: BallVelocity,
+    pub fpos: Vec2<f64>,
     pub speed: f64,
     pub theta: f64,
     pub theta_speed: f64,
@@ -51,30 +100,35 @@ impl Ball {
             old_point,
             point,
             sprite,
-            vx: 0.0,
-            vy: 0.0,
+            velocity: BallVelocity::new(0.0,0.0),
+            fpos: Vec2::new(point.x as f64, point.y as f64),
             speed: 0.90,
             theta: 3.6,
-            theta_speed: 0.45,
+            theta_speed: 0.06,
             power: 10.0,
             power_step: 1.0,
         }
     }
+
+
     fn new() -> Self {
         return Ball::new_at_loc(100, 100);
     }
-    pub fn calc_aim_path(&self, playground: &GameMap) -> AimLine {
+
+    pub fn aim_path(&self, playground: &GameMap) -> AimLine {
         // float starX = x+0.5+power/5*i*5*(float)sin(theta - PI/2);
         // float starY = y+0.5+power/5*i*5*(float)cos(theta + PI/2);
         let ball_center = self.center();
+        let theta_sin = f64::sin(self.theta - PI / 2.0);
+        let theta_cos = f64::cos(self.theta + PI / 2.0);
         let path_s_x =
-            ball_center.x as f64 + self.power / 3.0 * 1.0 * 3.0 * f64::sin(self.theta - PI / 2.0);
+            ball_center.x as f64 + 0.5 + self.power / 5.0 * 1.0 * 5.0 * theta_sin;
         let path_s_y =
-            ball_center.y as f64 + self.power / 3.0 * 1.0 * 3.0 * f64::cos(self.theta + PI / 2.0);
+            ball_center.y as f64 + 0.5 + self.power / 5.0 * 1.0 * 5.0 * theta_cos;
         let path_x =
-            ball_center.x as f64 + self.power / 3.0 * 12.0 * 3.0 * f64::sin(self.theta - PI / 2.0);
+            ball_center.x as f64 + 0.5 + self.power / 5.0 * 12.0 * 5.0 * theta_sin;
         let path_y =
-            ball_center.y as f64 + self.power / 3.0 * 12.0 * 3.0 * f64::cos(self.theta + PI / 2.0);
+            ball_center.y as f64 + 0.5 + self.power / 5.0 * 12.0 * 5.0 * theta_cos;
         let x1 = path_s_x; //self.x + (self.width / 2.0);
         let y1 = path_s_y; //self.y + (self.height / 2.0);
         let x2;
@@ -118,29 +172,24 @@ impl Ball {
     }
 
     pub fn hit(&mut self) {
-        let power_scalers =  self.power * self.speed ;
-        self.vx = power_scalers * f64::sin(self.theta - PI / 2.0);
-        self.vy = power_scalers * f64::cos(self.theta + PI / 2.0);
-
-        // if self.vy < 1.00 {
-        //     self.vy = 2.0
-        // }
-        // if self.vx < 1.00 {
-        //     self.vx = 2.0
-        // }
+        let power_scalers =  (self.power/4.0) * self.speed ;
+        let x_vel = power_scalers * (self.theta - PI / 2.0).sin();
+        let y_vel = power_scalers * (self.theta + PI / 2.0).cos();
+        self.velocity.update(Vec2::new(x_vel,y_vel));
+        // self.velocity = BallVelocity::new(vx,vy);
     }
 
     pub fn roll(&mut self, playground: &GameMap) {
         self.handle_collision(playground);
         self.old_point.x = self.point.x;
         self.old_point.y = self.point.y;
-        self.point.x = (self.point.x as f64 + (self.vx)) as usize;
-        self.point.y = (self.point.y as f64 + (self.vy)) as usize;
-        self.vx = self.vx * 0.9990;
-        self.vy = self.vy * 0.9990;
-        if f64::abs(self.vx) < 1.0 || f64::abs(self.vy)< 1.0 {
-            self.vx = 0.0;
-            self.vy = 0.0;
+        self.fpos.x += self.velocity.x();
+        self.fpos.y += self.velocity.y();
+        self.point.x = self.fpos.x as usize;
+        self.point.y = self.fpos.y as usize;
+        self.velocity.slow();
+        if self.velocity.velocity_below(0.1) {
+            self.velocity.stop();
         }
 
     }
@@ -149,11 +198,11 @@ impl Ball {
         let x_pos = (ball_center.x as i32) >> 4;
         let y_pos = (ball_center.y as i32) >> 4;
 
-        let x_upper = self.left() + 10;
-        let x_lower = self.right() - 10;
+        let x_upper = self.left() + 8;
+        let x_lower = self.right() - 8;
 
-        let y_upper = self.top() + 10;
-        let y_lower = self.bottom() - 10;
+        let y_upper = self.top() + 8;
+        let y_lower = self.bottom() - 8;
 
         let x_pos_upper = (x_upper as i32) >> 4;
         let x_pos_lower = (x_lower as i32) >> 4;
@@ -166,36 +215,38 @@ impl Ball {
             .tile_at(x_pos_upper as usize, y_pos as usize)
             .get_type()
             == &TileType::Wall
-            && self.vx > 0.0;
+            && self.velocity.x() > 0.0;
         let x_lower_collides_wall = map
             .tile_grid
             .tile_at(x_pos_lower as usize, y_pos as usize)
             .get_type()
             == &TileType::Wall
-            && self.vx < 0.0;
+            && self.velocity.x() < 0.0;
         let y_upper_collides_wall = map
             .tile_grid
             .tile_at(x_pos as usize, y_pos_upper as usize)
             .get_type()
             == &TileType::Wall
-            && self.vy > 0.0;
+            && self.velocity.y() > 0.0;
         let y_lower_collides_wall = map
             .tile_grid
             .tile_at(x_pos as usize, y_pos_lower as usize)
             .get_type()
             == &TileType::Wall
-            && self.vy < 0.0;
+            && self.velocity.y() < 0.0;
 
         if x_upper_collides_wall || x_lower_collides_wall || !self.is_within_x_bounds(map) {
             self.point.x = self.old_point.x;
-            self.vx = -self.vx;
+            self.velocity.invert_x();
+            // self.vx = -self.vx;
         }
 
         if y_upper_collides_wall || y_lower_collides_wall || !self.is_within_y_bounds(map) {
             self.point.y = self.old_point.y;
-            self.vy = -self.vy;
+            self.velocity.invert_y();
+            // self.vy = -self.vy;
         }
-        println!("Ball X Velocity: {} Ball Y Velocity: {}", self.vx,self.vy);
+        // println!("Ball X Velocity: {} Ball Y Velocity: {}", self.vx, self.vy);
 
     }
      fn is_within_x_bounds(&self, playground: &GameMap) -> bool {
