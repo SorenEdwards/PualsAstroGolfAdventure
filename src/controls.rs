@@ -1,13 +1,20 @@
-
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct Controls {
     pub aiming: Direction,
     pub power: PowerLevel,
+    pub adj: AdjustmentType,
     pub hit: bool,
 }
 
+#[derive(Clone, Debug, Default)]
+pub enum AdjustmentType {
+    #[default]
+    Min,
+    Max,
+}
+
 /// The player can only move left or right, but can also be stationary.
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub enum Direction {
     /// Do not move the player.
     #[default]
@@ -18,7 +25,7 @@ pub enum Direction {
     Right,
 }
 
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub enum PowerLevel {
     /// Do not move the player.
     #[default]

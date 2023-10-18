@@ -1,0 +1,62 @@
+
+// pub(crate) trait Animation {
+//     fn animate(&mut self, assets: &Assets);
+// }
+
+// impl Animation for SpriteRef {
+//     fn animate(&mut self, assets: &Assets) {
+//         if self.duration.subsec_nanos() == 0 {
+//             self.step_frame(assets);
+//         } else {
+//             self.dt += TIME_STEP;
+
+//             while self.dt >= self.duration {
+//                 self.dt -= self.duration;
+//                 self.step_frame(assets);
+//             }
+//         }
+//     }
+// }
+
+// impl Sprite {
+//     pub(crate) fn new(assets: &Assets, frame: Frame) -> Sprite {
+//         let (width, height, pixels) = assets.sprites().get(&frame).unwrap();
+
+//         Sprite {
+//             width: *width,
+//             height: *height,
+//             pixels: pixels.to_vec(),
+//         }
+//     }
+// }
+
+// impl SpriteRef {
+//     pub(crate) fn new(assets: &Assets, frame: Frame, duration: Duration) -> SpriteRef {
+//         let (width, height, pixels) = assets.sprites().get(&frame).unwrap();
+
+//         SpriteRef {
+//             width: *width,
+//             height: *height,
+//             pixels: Rc::clone(pixels),
+//             frame,
+//             duration,
+//             dt: Duration::default(),
+//         }
+//     }
+
+//     pub(crate) fn step_frame(&mut self, assets: &Assets) {
+//         use Frame::*;
+
+//         let assets = assets.sprites();
+//         let (pixels, frame) = match self.frame {
+//             Ball => (Rc::clone()),
+//             Wall => (Rc::clone()),
+//             Hole => (Rc::clone())
+
+//             _ => unreachable!(),
+//         };
+
+//         self.pixels = pixels;
+//         self.frame = frame;
+//     }
+// }

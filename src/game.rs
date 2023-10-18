@@ -1,67 +1,11 @@
+use std::clone;
 use std::rc::Rc;
 
-use crate::ball::*;
-use crate::geo::*;
-use crate::tiling::*;
 use crate::controls::*;
-
-pub struct GameMap {
-    pub point: Point,
-    pub width: usize,
-    pub height: usize,
-    pub tile_grid: TileGrid,
-}
-impl GameMap {
-    pub fn new() -> GameMap {
-        let point = Point::new(0, 0);
-        GameMap {
-            point: point,
-            width: 640,
-            height: 368,
-            tile_grid: TileGrid::new(),
-        }
-    }
-
-    pub fn draw(&self, frame: &mut [u8]) {
-        self.tile_grid.draw(frame);
-    }
-    pub fn point(&self) -> Vec2<usize> {
-        Vec2::new(self.point.x, self.point.y)
-    }
-
-    /// Returns the size (width and height) of the `Rect`.
-    pub fn size(&self) -> Vec2<usize> {
-        Vec2::new(self.width, self.height)
-    }
-
-    /// Returns the center position of the `Rect`.
-    pub fn center(&self) -> Vec2<usize> {
-        Vec2::new(
-            self.point.x + self.width / 2,
-            self.point.y + self.height / 2,
-        )
-    }
-
-    /// Returns the left edge of the `Rect`
-    pub fn left(&self) -> usize {
-        self.point.x
-    }
-
-    /// Returns the right edge of the `Rect`
-    pub fn right(&self) -> usize {
-        self.point.x + self.width
-    }
-
-    /// Returns the top edge of the `Rect`
-    pub fn top(&self) -> usize {
-        self.point.y
-    }
-
-    /// Returns the bottom edge of the `Rect`
-    pub fn bottom(&self) -> usize {
-        self.point.y + self.height
-    }
-}
+use crate::entities::ball::*;
+use crate::entities::tiles::*;
+use crate::geo::*;
+use crate::map::map::*;
 
 #[derive(PartialEq)]
 pub enum GolfState {
@@ -77,9 +21,6 @@ pub struct GameState {
     pub ball: Ball,
 }
 
-
-
-
 impl GameState {
     pub fn new() -> GameState {
         GameState {
@@ -91,31 +32,25 @@ impl GameState {
     fn update_aiming(&mut self, controls: &Controls) {
         match controls.aiming {
             Direction::Left => {
-                self.ball.theta += self.ball.theta_speed;
+                self.ball.angle.increase(controls.adj.clone());
+                // self.ball.theta += self.ball.theta_speed;
             }
             Direction::Right => {
-                self.ball.theta -= self.ball.theta_speed;
+                self.ball.angle.decrease(controls.adj.clone());
+                // self.ball.theta -= self.ball.theta_speed;
             }
-            Direction::Still => {
-
-            }
+            Direction::Still => {}
         }
     }
     fn update_power_level(&mut self, controls: &Controls) {
         match controls.power {
             PowerLevel::Up => {
-                if self.ball.power + self.ball.power_step < 10.3 {
-                    self.ball.power += self.ball.power_step;
-                }
+                self.ball.power.increase(controls.adj.clone());
             }
             PowerLevel::Down => {
-                if self.ball.power - self.ball.power_step > 0.7 {
-                    self.ball.power -= self.ball.power_step;
-                }
+                self.ball.power.decrease(controls.adj.clone());
             }
-            PowerLevel::Same => {
-
-            }
+            PowerLevel::Same => {}
         }
     }
     fn update_hitting(&mut self, controls: &Controls) {
@@ -131,7 +66,6 @@ impl GameState {
     pub fn update(&mut self, controls: &Controls) {
         self.update_state();
         self.update_controls(controls);
-
     }
     pub fn update_state(&mut self) {
         match self.state {
@@ -142,8 +76,8 @@ impl GameState {
                 let x_pos = (ball_center.x as i32) >> 4;
                 let y_pos = (ball_center.y as i32) >> 4;
 
-                let is_ball_velocity_in_range =
-                    f64::abs(self.ball.velocity.x()) <= 10.0 && f64::abs(self.ball.velocity.y()) <= 10.0;
+                let is_ball_velocity_in_range = f64::abs(self.ball.velocity.x()) <= 10.0
+                    && f64::abs(self.ball.velocity.y()) <= 10.0;
                 let is_ball_in_hole = self
                     .map
                     .tile_grid
@@ -153,7 +87,7 @@ impl GameState {
                     && is_ball_velocity_in_range;
                 if is_ball_in_hole {
                     self.state = GolfState::InHole;
-                    let reset_point = Point::new(28,30);
+                    let reset_point = Point::new(28, 30);
                     self.ball.reset_at(reset_point);
                 }
                 if self.ball.velocity.x() == 0.0 || self.ball.velocity.y() == 0.0 {
@@ -173,15 +107,13 @@ impl GameState {
                 self.state = GolfState::Aiming;
             }
         }
-
-
     }
     pub fn draw(&self, frame: &mut [u8]) {
         match self.state {
             GolfState::Aiming => {
                 self.map.draw(frame);
                 self.ball.draw(frame);
-                let path = self.ball.aim_path(&self.map);
+                let path = self.ball.aim_path();
                 path.draw(frame);
             }
             GolfState::Hitting => {
@@ -202,12 +134,7 @@ impl GameState {
             }
         }
     }
-    pub fn ball_ref(&self) -> Rc<&Ball>{
+    pub fn ball_ref(&self) -> Rc<&Ball> {
         return Rc::new(&self.ball);
     }
-
 }
-
-
-
-

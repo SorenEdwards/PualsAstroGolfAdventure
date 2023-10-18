@@ -1,5 +1,5 @@
 use crate::common::*;
-use crate::drawing::*;
+use crate::render::drawing::*;
 use core::time::Duration;
 use std::rc::Rc;
 #[derive(Clone, Debug)]
@@ -8,7 +8,6 @@ pub struct Sprite {
     pub height: usize,
     pub pixels: Vec<u8>,
 }
-
 
 #[derive(Clone, Debug)]
 pub struct SpriteRef {

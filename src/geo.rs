@@ -19,8 +19,7 @@ impl<T: core::ops::Add<Output = T>> core::ops::Add for Vec2<T> {
     }
 }
 
-impl<T: core::ops::Mul<Output = T>> core::ops::Mul for Vec2<T> 
-{
+impl<T: core::ops::Mul<Output = T>> core::ops::Mul for Vec2<T> {
     type Output = Self;
 
     fn mul(self, other: Self) -> Self {
@@ -33,13 +32,6 @@ impl<T: core::ops::Mul<Output = T>> core::ops::Mul for Vec2<T>
 pub struct Point {
     pub(crate) x: usize,
     pub(crate) y: usize,
-}
-
-/// A tiny rectangle based on two absolute `Point`s.
-#[derive(Copy, Clone, Debug, Default)]
-pub(crate) struct Rect {
-    pub(crate) p1: Point,
-    pub(crate) p2: Point,
 }
 
 impl Point {

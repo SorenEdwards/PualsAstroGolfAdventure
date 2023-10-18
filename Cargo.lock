@@ -966,6 +966,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "paga"
+version = "0.1.0"
+dependencies = [
+ "byteorder",
+ "env_logger",
+ "error-iter",
+ "game-loop",
+ "line_drawing",
+ "log",
+ "pixels",
+ "winit",
+ "winit_input_helper",
+]
+
+[[package]]
 name = "parking_lot"
 version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1867,21 +1882,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5de0485e86aa2ee87d2d4c373a908c9548357bc65c5bce19fd884c8ea9eac4d7"
 dependencies = [
  "winit",
-]
-
-[[package]]
-name = "winit_paga"
-version = "0.1.0"
-dependencies = [
- "byteorder",
- "env_logger",
- "error-iter",
- "game-loop",
- "line_drawing",
- "log",
- "pixels",
- "winit",
- "winit_input_helper",
 ]
 
 [[package]]

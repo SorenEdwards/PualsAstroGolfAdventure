@@ -1,8 +1,7 @@
 [package]
-name = "winit_paga"
+name = "paga"
 version = "0.1.0"
 edition = "2021"
-
 
 [features]
 optimize = ["log/release_max_level_warn"]

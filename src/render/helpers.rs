@@ -1,6 +1,6 @@
 use crate::common::*;
-use crate::drawing::*;
 use crate::geo::*;
+use crate::render::drawing::*;
 use core::cmp::min;
 use line_drawing::Bresenham;
 
@@ -77,6 +77,7 @@ pub(crate) fn line(screen: &mut [u8], p1: &Point, p2: &Point, color: [u8; 4]) {
     for (x, y) in Bresenham::new(p1, p2) {
         let x = min(x as usize, (WIDTH - 1) as usize);
         let y = min(y as usize, (HEIGHT - 1) as usize);
+
         let i = x * 4 + y * WIDTH as usize * 4;
 
         screen[i..i + 4].copy_from_slice(&color);

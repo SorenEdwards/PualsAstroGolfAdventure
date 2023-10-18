@@ -1,7 +1,7 @@
 use crate::common::*;
 use crate::geo::*;
-use crate::helpers::*;
-use crate::sprites::*;
+use crate::render::helpers::*;
+use crate::render::sprites::*;
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum TileType {
     Ground,

@@ -1,13 +1,11 @@
-use crate::drawing::*;
-use crate::menus::*;
-
-
+use crate::render::drawing::*;
+use crate::screens::menus::*;
 
 pub struct StartMenu {
     state: MenuOptions,
     width: usize,
     height: usize,
-    pixels: [u8;1024000]
+    pixels: [u8; 1024000],
 }
 
 impl StartMenu {
@@ -16,7 +14,7 @@ impl StartMenu {
             state: MenuOptions::NoSelection,
             width: 640,
             height: 400,
-            pixels: [128;1024000]
+            pixels: [128; 1024000],
         }
     }
 }

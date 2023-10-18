@@ -1,5 +1,6 @@
 use crate::geo::*;
-use crate::drawing::*;
+use crate::render::drawing::*;
+
 #[derive(Copy, Clone, Debug, Default)]
 pub(crate) struct Rect {
     pub(crate) p1: Point,

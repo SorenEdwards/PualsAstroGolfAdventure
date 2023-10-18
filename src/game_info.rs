@@ -1,13 +1,10 @@
-use crate::ball::*;
-use std::rc::Rc;
+use crate::entities::ball::*;
 pub struct InfoScreen {
-    ball: Ball
+    ball: Ball,
 }
 
 impl InfoScreen {
-    pub fn new() -> Self{
-        Self {
-            ball: Ball::new(),
-        }
+    pub fn new() -> Self {
+        Self { ball: Ball::new() }
     }
 }
