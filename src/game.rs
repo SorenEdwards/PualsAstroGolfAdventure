@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use crate::ball::*;
 use crate::geo::*;
 use crate::tiling::*;
@@ -75,6 +77,9 @@ pub struct GameState {
     pub ball: Ball,
 }
 
+
+
+
 impl GameState {
     pub fn new() -> GameState {
         GameState {
@@ -149,11 +154,8 @@ impl GameState {
                 if is_ball_in_hole {
                     self.state = GolfState::InHole;
                     let reset_point = Point::new(28,30);
-                    self.ball = Ball::new_at_loc(28, 30);
+                    self.ball.reset_at(reset_point);
                 }
-                // if self.ball.power == 0.0 {
-                //     self.state = GolfState::Aiming;
-                // }
                 if self.ball.velocity.x() == 0.0 || self.ball.velocity.y() == 0.0 {
                     self.state = GolfState::Aiming;
                 }
@@ -200,18 +202,12 @@ impl GameState {
             }
         }
     }
-}
-
-pub struct InfoScreen {
-    loc: Point
-}
-
-impl InfoScreen {
-    pub fn new() -> Self{
-        Self {
-            loc: Point::new(0,0)
-        }
+    pub fn ball_ref(&self) -> Rc<&Ball>{
+        return Rc::new(&self.ball);
     }
+
 }
+
+
 
 
