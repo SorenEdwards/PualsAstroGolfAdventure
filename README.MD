@@ -14,7 +14,7 @@ While mostly a hobby piece, this project aims to revive and move the COMP 2659 A
 - More variety in objects.
 - Information section on screen. 
 - Once a more complete version is complete the final task will be to create a web assembly varient so it can be playable by all. 
-
+- Portals teleport currently do nothing.
 ## Controls 
 - Aimming
     - Aim left, Left Arrow Key

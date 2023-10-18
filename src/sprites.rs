@@ -9,14 +9,7 @@ pub struct Sprite {
     pub pixels: Vec<u8>,
 }
 
-// #[derive(Debug, Eq, Hash, PartialEq, PartialOrd, Ord)]
-// pub(crate) enum Frame {
-//     ball,
-//     tile,
-// }
-/// SpriteRefs can be drawn and animated.
-///
-/// They reference their pixel data (instead of owning it).
+
 #[derive(Clone, Debug)]
 pub struct SpriteRef {
     width: usize,

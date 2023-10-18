@@ -3,6 +3,10 @@
 
 use crate::common::*;
 use crate::drawing::*;
+use crate::game_screen::*;
+use crate::game_info::*;
+use crate::start_screen::*;
+use crate::menus::*;
 use crate::game::*;
 use crate::controls::*;
 use error_iter::ErrorIter as _;
@@ -14,8 +18,14 @@ use winit::{
 };
 use winit_input_helper::WinitInputHelper;
 use game_loop::{game_loop, Time, TimeTrait as _};
+use std::rc::Rc;
 use std::{env, time::Duration};
 
+mod game_screen;
+mod end_screen;
+mod start_screen;
+mod game_info;
+mod menus;
 pub mod ball;
 pub mod common;
 pub mod drawing;
@@ -26,6 +36,8 @@ pub mod shapes;
 pub mod sprites;
 pub mod tiling;
 pub mod controls;
+
+
 pub const FPS: usize = 144;
 pub const TIME_STEP: Duration = Duration::from_nanos(1_000_000_000 / FPS as u64);
 // Internally, the game advances at 60 fps
@@ -41,68 +53,6 @@ fn log_error<E: std::error::Error + 'static>(method_name: &str, err: E) {
     }
 }
 
-
-pub struct GameScreen {
-    pub pixels: Pixels,
-    pub game: GameState,
-    pub info: InfoScreen,
-    pub controls: Controls,
-    pub input: WinitInputHelper,
-    pub paused: bool,
-}
-
-impl GameScreen {
-    fn new(pixels: Pixels, debug: bool) -> Self {
-        Self {
-          pixels,
-          game: GameState::new(), 
-          info: InfoScreen::new(),
-          controls: Controls::default(),
-          input: WinitInputHelper::new(), 
-          paused: false
-        }
-    }
-    fn update_controls(&mut self) {
-        // Pump the gilrs event loop and find an active gamepad
-        self.controls = {
-            // Keyboard controls
-            let mut left = self.input.key_held(VirtualKeyCode::Left);
-            let mut right = self.input.key_held(VirtualKeyCode::Right);
-            let mut up = self.input.key_pressed(VirtualKeyCode::Up);
-            let mut down = self.input.key_pressed(VirtualKeyCode::Down);
-            let mut hit = self.input.key_pressed(VirtualKeyCode::Space);
-            let mut pause = self.input.key_pressed(VirtualKeyCode::Pause)
-                | self.input.key_pressed(VirtualKeyCode::P);
-
-            if pause {
-                self.paused = !self.paused;
-            }
-
-            let aiming = if left {
-                Direction::Left
-            } else if right {
-                Direction::Right
-            } else {
-                Direction::Still
-            };
-
-            let power = if up {
-                PowerLevel::Up
-            } else if down {
-                PowerLevel::Down
-            } else {
-                PowerLevel::Same
-            };
-
-            Controls { aiming, power, hit }
-        };
-    }
-
-    fn reset_game(&mut self) {
-        self.game.ball.move_to(Point::new(28,30));
-
-    }
-}
 
 
 

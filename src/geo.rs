@@ -1,3 +1,4 @@
+#[derive(Copy, Clone, Debug, Default)]
 pub struct Vec2<T> {
     pub x: T,
     pub y: T,
@@ -7,6 +8,23 @@ impl<T> Vec2<T> {
     #[inline(always)]
     pub fn new(x: T, y: T) -> Self {
         Self { x, y }
+    }
+}
+
+impl<T: core::ops::Add<Output = T>> core::ops::Add for Vec2<T> {
+    type Output = Self;
+
+    fn add(self, other: Self) -> Self {
+        Self::new(self.x + other.x, self.y + other.y)
+    }
+}
+
+impl<T: core::ops::Mul<Output = T>> core::ops::Mul for Vec2<T> 
+{
+    type Output = Self;
+
+    fn mul(self, other: Self) -> Self {
+        Self::new(self.x * other.x, self.y * other.y)
     }
 }
 

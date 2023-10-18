@@ -4,9 +4,10 @@ use crate::geo::*;
 use crate::helpers::*;
 use crate::sprites::*;
 use crate::tiling::*;
-
+use std::ops::Deref;
 
 static PI: f64 = 3.14159265359;
+#[derive(Clone, Debug)]
 pub struct BallVelocity {
     velocity:Vec2<f64>,
     friction: f64
@@ -49,13 +50,17 @@ impl BallVelocity {
     pub fn to_map_point(self) -> Point{
         return Point::new(self.velocity.x as usize, self.velocity.y as usize);
     }
+    pub fn vec2(&self) -> Vec2<f64> {
+        return self.velocity.clone();
+    }
 }
 
+#[derive(Copy,Clone, Debug)]
 pub enum BallState {
     Rolling,
     Stopped
 }
-
+#[derive(Copy,Clone, Debug)]
 pub struct AimLine {
     p1: Point,
     p2: Point,
@@ -72,6 +77,8 @@ impl AimLine {
         line(frame, &self.p1, &self.p2, [0xff, 0xff, 0xff, 0xff]);
     }
 }
+
+#[derive(Clone, Debug)]
 pub struct Ball {
     old_point: Point,
     point: Point,
@@ -111,13 +118,11 @@ impl Ball {
     }
 
 
-    fn new() -> Self {
+    pub fn new() -> Self {
         return Ball::new_at_loc(100, 100);
     }
 
     pub fn aim_path(&self, playground: &GameMap) -> AimLine {
-        // float starX = x+0.5+power/5*i*5*(float)sin(theta - PI/2);
-        // float starY = y+0.5+power/5*i*5*(float)cos(theta + PI/2);
         let ball_center = self.center();
         let theta_sin = f64::sin(self.theta - PI / 2.0);
         let theta_cos = f64::cos(self.theta + PI / 2.0);
@@ -129,8 +134,8 @@ impl Ball {
             ball_center.x as f64 + 0.5 + self.power / 5.0 * 12.0 * 5.0 * theta_sin;
         let path_y =
             ball_center.y as f64 + 0.5 + self.power / 5.0 * 12.0 * 5.0 * theta_cos;
-        let x1 = path_s_x; //self.x + (self.width / 2.0);
-        let y1 = path_s_y; //self.y + (self.height / 2.0);
+        let x1 = path_s_x; 
+        let y1 = path_s_y; 
         let x2;
         let y2;
         let _x = match (
@@ -181,12 +186,9 @@ impl Ball {
 
     pub fn roll(&mut self, playground: &GameMap) {
         self.handle_collision(playground);
-        self.old_point.x = self.point.x;
-        self.old_point.y = self.point.y;
-        self.fpos.x += self.velocity.x();
-        self.fpos.y += self.velocity.y();
-        self.point.x = self.fpos.x as usize;
-        self.point.y = self.fpos.y as usize;
+        self.old_point = self.point;
+        self.fpos = self.fpos + self.velocity.vec2();
+        self.point = Point::new(self.fpos.x as usize,self.fpos.y as usize);
         self.velocity.slow();
         if self.velocity.velocity_below(0.1) {
             self.velocity.stop();
@@ -200,15 +202,14 @@ impl Ball {
 
         let x_upper = self.left() + 8;
         let x_lower = self.right() - 8;
-
         let y_upper = self.top() + 8;
         let y_lower = self.bottom() - 8;
 
         let x_pos_upper = (x_upper as i32) >> 4;
         let x_pos_lower = (x_lower as i32) >> 4;
-
         let y_pos_upper = (y_upper as i32) >> 4;
         let y_pos_lower = (y_lower as i32) >> 4;
+
         println!("X UP: {} X LOWER: {} Y UP: {} Y: LOWER{}",x_pos_upper,x_pos_lower,y_pos_upper,y_pos_lower);
         let x_upper_collides_wall = map
             .tile_grid
@@ -249,6 +250,13 @@ impl Ball {
         // println!("Ball X Velocity: {} Ball Y Velocity: {}", self.vx, self.vy);
 
     }
+    fn handle_collision_x() {
+
+    }
+    fn handle_collision_y() {
+        
+    }
+
      fn is_within_x_bounds(&self, playground: &GameMap) -> bool {
         if self.point.x < playground.left() || self.point.x + self.sprite.width > playground.right()
         {
@@ -313,6 +321,14 @@ impl Ball {
     pub fn move_to(&mut self, destination: Point) {
         self.point.x = destination.x;
         self.point.y = destination.y;
+    }
+
+    pub fn reset_at(&mut self,point: Point) {
+            self.old_point = point.clone();
+            self.point = point;
+            self.velocity = BallVelocity::new(0.0,0.0);
+            self.fpos =Vec2::new(point.x as f64, point.y as f64);
+
     }
 
     pub fn draw(&self, frame: &mut [u8]) {
